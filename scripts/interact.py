@@ -10,9 +10,15 @@ with open("../build/contracts/Voting.json") as f:
 abi = contract_json["abi"]
 
 # # Replace with the deployed contract address
-contract_address = "0xA2ec7D0F786e55c077dBa20dE34eC17D9C54f7C9"
+contract_address = "0x4AA4b8221b604c11A0F94b85F5663B49D5e12a54"
 
 contract = w3.eth.contract(address=contract_address, abi=abi)
+def get_vids():
+    vids = contract.functions.getVIDs().call()
+    arr = []
+    for vid in vids:
+        arr.append(vid.hex())
+    return arr
 
 def get_vote_count():
     try:
@@ -30,9 +36,10 @@ def perform_vote(id):
         "from": accounts[1],
         "gas": 6721975,
     }  
+    vid = contract.functions.performVote(vote_data).call()
     contract.functions.performVote(vote_data).transact(tx_object)
-
-    print("Vote recorded successfully!")
+    print("Your vote is successfully counted\nHere is your VID:")
+    print(vid.hex())
 def submitKey(key):
     accounts = w3.eth.accounts
     tx_object = {
@@ -70,6 +77,7 @@ def vote_count_phase():
         countedVotes = get_vote_count()
         print("Votes: ")
         print(countedVotes)
+        print(get_vids())
     elif choice == '3':
         return
     else:
@@ -102,5 +110,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
     
     # print("here")
