@@ -8,10 +8,16 @@ contract Voting {
     uint256 private g;
     uint256 private l;
     uint256 private m;
-    uint256 private constant candidate_count = 2;
+    uint256 private constant candidate_count = 5;
 
     uint256[candidate_count][] private votes;
     uint256[candidate_count] private countedVotes;
+    int256[candidate_count] private voteCountError;
+
+    uint256 private constant key_count = 5;
+    uint256 private constant thresh = 3;
+    uint256 [] private receivedKeys;
+    uint256[key_count] private th_keys;
 
     struct PrivateKey {
         uint256 l;
@@ -37,6 +43,13 @@ contract Voting {
 
         publicKey = PublicKey(n, n * n, n + 1);
         privateKey = PrivateKey(l, m);
+
+        for(uint256 i = 0 ; i < key_count;i++){
+            th_keys[i] = (i+1)*512345;
+        }
+        for(uint256 i = 0 ; i < candidate_count;i++){
+            voteCountError[i] = -1;
+        }
     }
 
     function modInverse(uint256 a, uint256 pp, uint256 maxiter) internal pure returns (uint256) {
@@ -106,6 +119,7 @@ contract Voting {
     }
 
     function voteCount() public returns (uint256[candidate_count] memory) {
+        require(receivedKeys.length >= thresh);
         for (uint256 i = 0; i < candidate_count; i++) {
             countedVotes[i] = encrypt(0);
         }
@@ -117,7 +131,21 @@ contract Voting {
         for (uint256 i = 0; i < candidate_count; i++) {
             countedVotes[i] = decrypt(countedVotes[i]);
         }
-
         return countedVotes;
     }
+
+    function submitKey(uint256 key) public returns(string memory){
+        for(uint256 i = 0 ; i < receivedKeys.length; i++){
+            if(receivedKeys[i] == key)
+                return "This key is already submitted once";
+        }
+        for(uint256 i = 0 ; i < key_count; i++){
+            if(th_keys[i] == key){
+                receivedKeys.push(key);
+                return "Key submitted successfully";
+            }
+        }
+        return "Provided key is incorrect"; 
+    }
+
 }

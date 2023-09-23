@@ -1,33 +1,28 @@
 const { Web3 } = require("web3");
 const web3 = new Web3("http://127.0.0.1:8545/"); // Replace with your Ethereum node URL
 
-const { abi } = require("../build/contracts/Voting.json");
+const { abi } = require("../build/contracts/Keydistribution.json");
 
-const contractAddress = "0xfcf6d14E948F5359Fab97401AA1D04fe5230D0eA"; // Replace with the deployed contract address
+const contractAddress = "0x7fbE4a85C0C27202734DA87F36EBE3925A53C9e9"; // Replace with the deployed contract address
 
 const contract = new web3.eth.Contract(abi, contractAddress);
 
-async function getVoteCount() {
-  const voteCounts = await contract.methods.voteCount().call();
+async function getKey() {
+  try {
+    // Replace with your Ethereum account address
+    const senderAddress = '0xe26e68Bd644543A419BB8e9c9C822061F8DEe2F3';
 
-  console.log("Vote Counts:", voteCounts);
+    // Call the getKey function
+    const result = await contract.methods.getKey().call({ from: senderAddress });
+
+    return `Key Obtained: ${result}`;
+  } catch (error) {
+    console.error(`An error occurred: ${error.message}`);
+    return 'Transaction failed';
+  }
 }
 
-async function performVote() {
-  const voteData = [0, 1];
-  const accounts = await web3.eth.getAccounts();
-  const txObject = {
-    from: accounts[1],
-    gasLimit: 6721975,
-  };
-  await contract.methods.performVote(voteData).send(txObject);
-  await contract.methods.performVote(voteData).send(txObject);
-  await contract.methods.performVote(voteData).send(txObject);
-  await contract.methods.performVote(voteData).send(txObject);
-
-  console.log("Vote recorded successfully!");
-}
-
-// Use the functions to interact with the contract
-performVote();
-getVoteCount();
+// Call the getKey function
+getKey()
+  .then(result => console.log(result))
+  .catch(error => console.error(error));
