@@ -12,13 +12,14 @@ contract Voting {
 
     uint256[candidate_count][] private votes;
     uint256[candidate_count] private countedVotes;
-    int256[candidate_count] private voteCountError;
+    bytes32[] private vids; 
 
     uint256 private constant key_count = 5;
-    uint256 private constant thresh = 3;
+    uint256 private constant thresh = 1;
     uint256 [] private receivedKeys;
     uint256[key_count] private th_keys;
-
+    
+    
     struct PrivateKey {
         uint256 l;
         uint256 m;
@@ -47,9 +48,7 @@ contract Voting {
         for(uint256 i = 0 ; i < key_count;i++){
             th_keys[i] = (i+1)*512345;
         }
-        for(uint256 i = 0 ; i < candidate_count;i++){
-            voteCountError[i] = -1;
-        }
+        
     }
 
     function modInverse(uint256 a, uint256 pp, uint256 maxiter) internal pure returns (uint256) {
@@ -108,14 +107,14 @@ contract Voting {
         }
     }
 
-    function performVote(uint256[candidate_count] memory vote) public returns (string memory) {
+    function performVote(uint256[candidate_count] memory vote) public returns (bytes32) {
         for (uint256 i = 0; i < vote.length; i++) {
             vote[i] = encrypt(vote[i]);
         }
-
         votes.push(vote);
-
-        return "Your vote has been counted";
+        bytes32 vid = generateVID(votes.length);
+        vids.push(vid);
+        return generateVID(votes.length);
     }
 
     function voteCount() public returns (uint256[candidate_count] memory) {
@@ -147,5 +146,49 @@ contract Voting {
         }
         return "Provided key is incorrect"; 
     }
+
+
+
+
+   
+    function generateVID(uint256 input) public pure returns (bytes32) {
+        // Convert the integer to a string
+        string memory inputString = uintToString(input);
+        
+        // Hash the string
+        bytes32 hash = sha256(bytes(inputString));
+        
+        // Convert the bytes32 hash to a string
+        
+        return hash;
+    }
+    
+    function uintToString(uint256 input) public  pure returns (string memory) {
+        if (input == 0) {
+            return "0";
+        }
+        
+        uint256 temp = input;
+        uint256 length;
+        
+        while (temp > 0) {
+            length++;
+            temp /= 10;
+        }
+        
+        bytes memory buffer = new bytes(length);
+        while (input > 0) {
+            length--;
+            buffer[length] = bytes1(uint8(48 + input % 10));
+            input /= 10;
+        }
+        
+        return string(buffer);
+    }
+    function getVIDs() public view returns(bytes32[] memory){
+        return vids;
+    }
+    
+
 
 }

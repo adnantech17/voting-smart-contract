@@ -10,7 +10,7 @@ with open("../build/contracts/Voting.json") as f:
 abi = contract_json["abi"]
 
 # # Replace with the deployed contract address
-contract_address = "0x4AA4b8221b604c11A0F94b85F5663B49D5e12a54"
+contract_address = "0x28da5C0Ec29ff96287CC3268A545414942d72522"
 
 contract = w3.eth.contract(address=contract_address, abi=abi)
 def get_vids():
